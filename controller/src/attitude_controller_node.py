@@ -10,14 +10,6 @@ from std_msgs.msg import Int32MultiArray
 rospy.init_node("attitude_controller_node")
 rate = rospy.Rate(100)
 
-def data_type(num):
-    data = [0,0,0,0]
-
-    for i in range(0,4):
-        data[i] = num
-
-    return data
-
 class Controller():
     def __init__(self):
         self.imu_sub = Imu() # Paraentheses behind intialization of a message object are required.
@@ -25,9 +17,10 @@ class Controller():
         self.msg = Int32MultiArray()
         self.msg.layout.dim = []
         self.msg.layout.data_offset = 16
+        self.motorNum = 8
 
         self.commanded = rospy.Publisher('/command', Int32MultiArray, queue_size=10)
-        self.msg.data = data_type(0)
+        self.msg.data = self.data_type(0)
 
     def callbackIMU(self,data):
         self.imu_sub = data
@@ -51,7 +44,16 @@ class Controller():
             self.msg.data = [0,1550,1500,0,0,0,0,0]
             self.commanded.publish(self.msg)
 
-        
+    def data_type(self,num):
+        data = []
+        for i in range(0,self.motorNum):
+            data.append(0)
+
+        for i in range(0,self.motorNum):
+            data[i] = num
+
+        return data
+    
 if __name__ == '__main__':
     try:
         loop = Controller()
